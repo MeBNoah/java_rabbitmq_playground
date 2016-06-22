@@ -1,6 +1,7 @@
 package com.worker;
 
 
+import com.exchange.direct.explicit.DirectMessageSender;
 import com.helper.ConnectionHelper;
 import com.rabbitmq.client.*;
 
@@ -31,7 +32,12 @@ public class Executor {
         Connection connection = ConnectionHelper.connect();
         final Channel channel = connection.createChannel();
 
+        channel.exchangeDeclare(Server.EXCHANGE_NAME, "direct");
         channel.queueDeclare(TASK_QUEUE_NAME, true, false, false, null);
+
+        //hier kann man auch mehrere routing keys binden
+        channel.queueBind(TASK_QUEUE_NAME, Server.EXCHANGE_NAME, Server.ROUTING_KEY);
+
         System.out.println(this.name + " [*] Waiting for messages");
 
         channel.basicQos(1);
